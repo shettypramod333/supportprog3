@@ -1,0 +1,26 @@
+import numpy as np
+import matplotlib.pyplot as plt 
+from sklearn.datasets import make_blobs 
+from sklearn.svm import SVC
+
+X, y = make_blobs(n_samples=100, centers=2, random_state=42, cluster_std=1.5)
+
+model = SVC(kernel='linear')
+model.fit(X, y)
+
+def plot_decision_boundary(X, y, model):
+    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.01),
+                         np.arange(y_min, y_max, 0.01))
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+    
+    plt.contourf(xx, yy, Z, alpha=0.8, cmap=plt.cm.coolwarm)
+    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.coolwarm, edgecolors='k', marker='o')
+    plt.xlabel('Feature 1')
+    plt.ylabel('Feature 2')
+    plt.title('SVM Decision Boundary')
+    plt.show()
+
+plot_decision_boundary(X, y, model)
