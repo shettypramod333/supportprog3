@@ -1,0 +1,28 @@
+import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from collections import Counter
+
+# Euclidean distance and KNN classifier
+def knn_classify(X_train, y_train, X_test, k=3):
+    predictions = []
+    for test_point in X_test:
+        distances = np.linalg.norm(X_train - test_point, axis=1)
+        nearest_labels = [y_train[i] for i in np.argsort(distances)[:k]]
+        predictions.append(Counter(nearest_labels).most_common(1)[0][0])
+    return predictions
+
+# Load dataset and split
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Classify and evaluate
+predictions = knn_classify(X_train, y_train, X_test)
+correct = sum(pred == actual for pred, actual in zip(predictions, y_test))
+accuracy = correct / len(y_test) * 100
+
+# Output results
+for i, (pred, actual) in enumerate(zip(predictions, y_test)):
+    result = "Correct" if pred == actual else "Incorrect"
+    print(f"Test Sample {i+1}: {result} (Predicted: {pred}, Actual: {actual})")
+print(f"\nAccuracy: {accuracy:.2f}%")
