@@ -1,0 +1,29 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def locally_weighted_regression(X, y, tau, x_query):
+    W = np.exp(-np.sum((X - x_query) * 2, axis=1) / (2 * tau * 2))
+    W = np.diag(W)
+    X_b = np.c_[np.ones((len(X), 1)), X]
+    theta = np.linalg.pinv(X_b.T @ W @ X_b) @ X_b.T @ W @ y
+    return np.array([1, x_query]) @ theta
+
+# Generate data
+np.random.seed(0)
+X = 2 * np.random.rand(100, 1)
+y = (3 + 2 * X + np.random.rand(100, 1)).flatten()
+X, y = X[np.argsort(X.flatten())], y[np.argsort(X.flatten())]
+
+# Predictions
+tau = 0.1
+x_test = np.linspace(X.min(), X.max(), 100)
+y_pred = [locally_weighted_regression(X, y, tau, x) for x in x_test]
+
+# Plotting
+plt.scatter(X, y, color='blue', label='Data points')
+plt.plot(x_test, y_pred, color='red', label='LWR fit')
+plt.xlabel('X')
+plt.ylabel('y')
+plt.title('Locally Weighted Regression')
+plt.legend()
+plt.show()
