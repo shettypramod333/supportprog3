@@ -1,0 +1,38 @@
+import numpy as np
+
+# Initialize grid, actions, and rewards
+grid_size, actions = (5, 5), ["up", "down", "left", "right"]
+num_actions = len(actions)
+num_states = grid_size[0] * grid_size[1]
+rewards = np.full(num_states, -1)
+
+# Helper functions
+state_to_coordinates = lambda state: divmod(state, grid_size[1])
+coordinates_to_state = lambda x, y: x * grid_size[1] + y
+take_action = lambda state, action: coordinates_to_state(
+    max(0, min(grid_size[0] - 1, state // grid_size[1] + (action == "down") - (action == "up"))),
+    max(0, min(grid_size[1] - 1, state % grid_size[1] + (action == "right") - (action == "left")))
+)
+
+# Initialize terminal state
+terminal_state = coordinates_to_state(4, 4)
+rewards[terminal_state] = 100
+
+# Q-Learning setup
+q_table = np.zeros((num_states, num_actions))
+alpha, gamma, epsilon, num_episodes = 0.1, 0.9, 0.2, 500
+
+# Q-Learning algorithm
+for _ in range(num_episodes):
+    state = np.random.randint(0, num_states)
+    while state != terminal_state:
+        action = np.random.randint(0, num_actions) if np.random.rand() < epsilon else np.argmax(q_table[state])
+        next_state, reward = take_action(state, actions[action]), rewards[take_action(state, actions[action])]
+        q_table[state, action] += alpha * (reward + gamma * np.max(q_table[next_state]) - q_table[state, action])
+        state = next_state
+
+# Display results
+policy = np.argmax(q_table, axis=1)
+policy_grid = np.array([actions[a] for a in policy]).reshape(grid_size)
+print("Optimal Policy:\n", policy_grid)
+print("Q-Table:\n", q_table)
